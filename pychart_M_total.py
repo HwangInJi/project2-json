@@ -13,7 +13,7 @@ import urllib.parse
 
 # 현재 날짜 가져오기
 current_date = datetime.now().strftime("%Y-%m-%d")
-filename = f"MusicalData/pychart_M_total{current_date}.json"
+filename = f"MusicalData/pychart_M_total_{current_date}.json"
 
 # 웹 드라이버 설정
 options = ChromeOptions()
