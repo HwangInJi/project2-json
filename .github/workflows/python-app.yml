@@ -49,10 +49,10 @@ jobs:
         git config --global user.email "dlswl1993@gmail.com"
         git config --global user.name "HwangInJi" 
         git add MusicalData/pychart_M_total*.json
-        git commit -m "차트 수집 완료"
+        git commit -m "차트 수집 완료" || echo "No changes to commit"
 
     - name: push
       uses: ad-m/github-push-action@master
       with:
         branch: "main"
-        github_token: ${{ secrets.GITHUB_TOKEN }}
+        github_token: ${{ secrets.ACTIONS_DEPLOY_KEY }}
