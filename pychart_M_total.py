@@ -92,13 +92,62 @@ def get_cast_info(title):
         print(f"Error processing {title}:", e)
         return "정보없음"
 
+def get_casting_info(title):
+    try:
+        query = urllib.parse.quote(title + " 캐스팅일정")
+        search_url = f"https://search.naver.com/search.naver?where=nexearch&sm=tab_etc&mra=bkkw&pkid=269&query={query}"
+        browser.get(search_url)
+        time.sleep(10)  # 페이지 로딩 대기
+
+        # 검색 결과 페이지가 로드되었는지 확인
+        WebDriverWait(browser, 20).until(
+            EC.presence_of_element_located((By.CSS_SELECTOR, ".timeline_list.casting_list"))
+        )
+        print(f"Loaded casting schedule for {title}.")
+
+        # 페이지 소스 가져오기
+        page_source = browser.page_source
+
+        # BeautifulSoup을 사용하여 HTML 파싱
+        soup = BeautifulSoup(page_source, 'html.parser')
+
+        # 캐스팅 일정 데이터 추출
+        casting_data = []
+        casting_items = soup.select(".timeline_list.casting_list li")
+        if not casting_items:
+            print(f"No casting items found for {title}.")
+            return "정보없음"
+
+        for item in casting_items:
+            cast_date = item.select_one(".cm_date").text.strip() if item.select_one(".cm_date") else "정보없음"
+            time_contents = item.select(".time_content")
+            for time_content in time_contents:
+                cast_time = time_content.select_one(".time_title time").text.strip() if time_content.select_one(".time_title time") else "정보없음"
+                cast_list = []
+                cast_items = time_content.select(".list .area_link")
+                for cast in cast_items:
+                    name = cast.select_one(".name").text.strip() if cast.select_one(".name") else "정보없음"
+                    role = cast.select_one(".sub_text").text.strip() if cast.select_one(".sub_text") else "정보없음"
+                    cast_list.append({"name": name, "role": role})
+
+                casting_data.append({
+                    "cast_date": cast_date,
+                    "cast_time": cast_time,
+                    "cast_list": cast_list
+                })
+
+        return casting_data
+
+    except Exception as e:
+        print(f"Error processing {title}:", e)
+        return "정보없음"
+
 # 멜론 순위 데이터를 가져와서 처리
 try:
     tracks = get_melon_ranking()
-    if not tracks:
-        print("No ranking data found.")
-    else:
-        track = tracks[0]  # 1위 트랙만 선택
+    music_data = []
+
+    for track in tracks:
         rank = track.select_one("td.fst .ranking").text.strip() if track.select_one("td.fst .ranking") else "정보없음"
         change = track.select_one("td.fst .change").text.strip() if track.select_one("td.fst .change") else "정보없음"
         # change 텍스트에서 불필요한 공백 제거
@@ -120,14 +169,16 @@ try:
             "date": date
         }
 
-        # 네이버에서 출연진 데이터 추가
+        # 네이버에서 출연진 및 캐스팅 일정 데이터 추가
         music_entry['cast'] = get_cast_info(title)
-        
-        # 데이터를 JSON 파일로 저장
-        with open(filename, 'w', encoding='utf-8') as f:
-            json.dump(music_entry, f, ensure_ascii=False, indent=4)
+        music_entry['casting_schedule'] = get_casting_info(title)
+        music_data.append(music_entry)
 
-        print("Ranking data saved to JSON file.")
+    # 데이터를 JSON 파일로 저장
+    with open(filename, 'w', encoding='utf-8') as f:
+        json.dump(music_data, f, ensure_ascii=False, indent=4)
+
+    print("All ranking data saved to JSON file.")
 
 except Exception as e:
     print("Error processing the Melon ranking data:", e)
