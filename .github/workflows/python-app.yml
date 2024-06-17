@@ -17,9 +17,9 @@ jobs:
         python-version: ["3.9", "3.10", "3.11"]
 
     steps:
-      - uses: actions/checkout@v4 # Updated to the latest version
+      - uses: actions/checkout@v4
       - name: Set up Python ${{ matrix.python-version }}
-        uses: actions/setup-python@v4 # Updated to the latest version
+        uses: actions/setup-python@v4
         with:
           python-version: ${{ matrix.python-version }}
 
@@ -36,7 +36,7 @@ jobs:
           pip install selenium
           pip install webdriver_manager
 
-      - name: run file
+      - name: Run script
         run: |
           python pychart_M_total.py
 
@@ -44,17 +44,21 @@ jobs:
         id: check_changes
         run: |
           git config --global user.email "dlswl1993@gmail.com"
-          git config --global user.name "HwangInJi"         
+          git config --global user.name "HwangInJi"
           git add musicaldata/pychart_M_total_*.json
-          git diff --cached --exit-code || echo "changes detected" > changes.txt
+          if git diff --cached --exit-code; then
+            echo "::set-output name=changes::no"
+          else
+            echo "::set-output name=changes::yes"
+          fi
 
       - name: Commit changes
-        if: steps.check_changes.outputs.changes == 'changes detected'
+        if: steps.check_changes.outputs.changes == 'yes'
         run: |
           git commit -m "차트 수집 완료" || echo "No changes to commit"
 
       - name: Push changes
-        if: steps.check_changes.outputs.changes == 'changes detected'
+        if: steps.check_changes.outputs.changes == 'yes'
         uses: ad-m/github-push-action@master
         with:
           branch: "main"
