@@ -45,7 +45,7 @@ jobs:
         run: |
           git config --global user.email "dlswl1993@gmail.com"
           git config --global user.name "HwangInJi"         
-          git add MusicalData/pychart_M_total_*.json
+          git add pychart_M_total_*.json
           git diff --cached --exit-code || echo "changes detected" > changes.txt
 
       - name: Commit changes
