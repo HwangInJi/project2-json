@@ -40,18 +40,22 @@ jobs:
         pip install selenium
         pip install webdriver_manager
       
-    - name: run file
+    - name: Run script
       run: |
-        python pychart_M_total.py
+        python MusicalData/pychart_M_total.py
 
-    - name: commits
+    - name: Commit changes
       run: |
         git config --global user.email "dlswl1993@gmail.com"
-        git config --global user.name "HwangInJi" 
-        git add MusicalData/pychart_M_total*.json
-        git commit -m "차트 수집 완료" || echo "No changes to commit"
+        git config --global user.name "HwangInJi"
+        if ls MusicalData/pychart_M_total*.json 1> /dev/null 2>&1; then
+          git add MusicalData/pychart_M_total*.json
+          git commit -m "차트 수집 완료" || echo "No changes to commit"
+        else
+          echo "No JSON files to add."
+        fi
 
-    - name: push
+    - name: Push changes
       uses: ad-m/github-push-action@master
       with:
         branch: "main"
