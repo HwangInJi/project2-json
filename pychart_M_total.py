@@ -19,7 +19,10 @@ filename = f"MusicalData/pychart_M_total{current_date}.json"
 options = ChromeOptions()
 options.add_argument("--disable-dev-shm-usage")
 options.add_argument("user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36")
-options.add_argument("--headless")
+options.add_argument("--headless")  # Headless 모드 추가
+options.add_argument("--no-sandbox")  # GitHub Actions에서 필요한 설정
+options.add_argument("--disable-gpu")  # GitHub Actions에서 필요한 설정
+options.add_argument("--window-size=1920,1080")  # Headless 모드에서 창 크기 설정
 service = ChromeService(ChromeDriverManager().install())
 browser = webdriver.Chrome(service=service, options=options)
 
